@@ -54,7 +54,7 @@
         <h1>Latest Thunder Score</h1>
         <div id="score" class="score">Loading...</div>
         <div>
-            <button onclick="refreshScore()">Refresh Score</button>
+            <button onclick="refreshScore()" id="refreshButton">Refresh Score</button>
             <button onclick="window.location.href='index.html'" class="back-button">Back to Home</button>
         </div>
     </div>
@@ -65,8 +65,24 @@
         // 1. Use a backend server to make API calls
         // 2. Never expose API keys in frontend code
         async function refreshScore() {
-            const score = await getThunderScore();
-            document.getElementById('score').textContent = score;
+            try {
+                // Disable the refresh button while loading
+                const refreshButton = document.getElementById('refreshButton');
+                refreshButton.disabled = true;
+                refreshButton.textContent = 'Refreshing...';
+                
+                // Get and display the score
+                const score = await getThunderScore();
+                document.getElementById('score').textContent = score;
+            } catch (error) {
+                console.error('Error in refreshScore:', error);
+                document.getElementById('score').textContent = 'Error loading score. Please try again.';
+            } finally {
+                // Re-enable the refresh button
+                const refreshButton = document.getElementById('refreshButton');
+                refreshButton.disabled = false;
+                refreshButton.textContent = 'Refresh Score';
+            }
         }
 
         // Load score when page loads

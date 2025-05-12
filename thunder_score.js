@@ -38,7 +38,4 @@ async function getThunderScore() {
         console.error('Error with ESPN API:', error);
         return "Error fetching score. Check browser console for details.";
     }
-}
-
-// Export the function so it can be used in other files
-module.exports = { getThunderScore }; 
+} 
