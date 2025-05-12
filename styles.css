@@ -12,8 +12,9 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 100vh;
+    min-height: 100vh;
     gap: 20px;  /* Added spacing for multiple sections */
+    padding: 20px;
 }
 
 /* Heading Styles */
@@ -57,4 +58,57 @@ button:last-of-type {
 
 button:last-of-type:hover {
     background-color: #1557b0;  /* Darker blue */
+}
+
+/* Greeting List Styling */
+.greeting-list {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    max-width: 600px;
+    width: 100%;
+}
+
+.greeting-list ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.greeting-list li {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    font-size: 16px;
+}
+
+.greeting-list li:last-child {
+    border-bottom: none;
+}
+
+/* Paragraph Styling */
+p {
+    color: #666;
+    font-size: 18px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Link Button Styling */
+.link-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #1a73e8;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.5s ease;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.link-button:hover {
+    background-color: #000000;
+    transform: scale(1.05);
 } 
