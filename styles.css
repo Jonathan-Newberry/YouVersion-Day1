@@ -115,4 +115,27 @@ button:last-of-type:hover {
 
 .greeting-list li:last-child {
     border-bottom: none;
+}
+
+/* ===== Navigation Buttons ===== */
+.nav-buttons {
+    display: flex;
+    gap: 15px;  /* Space between buttons */
+    margin-top: 10px;
+}
+
+.nav-buttons .link-button {
+    background-color: #1a73e8;  /* Google blue */
+}
+
+.nav-buttons .link-button:hover {
+    background-color: #1557b0;  /* Darker blue */
+}
+
+.nav-buttons .link-button:last-child {
+    background-color: #ea4335;  /* Thunder red */
+}
+
+.nav-buttons .link-button:last-child:hover {
+    background-color: #d33426;  /* Darker red */
 } 
