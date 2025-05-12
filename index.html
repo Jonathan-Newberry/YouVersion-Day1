@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<!-- This is a test comment to show Git changes -->
+<!-- Head Section: Meta Information and Links -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,18 +9,22 @@
 </head>
 <body>
     <div class="container">
-        <!-- New Welcome Message Section -->
+        <!-- ===== Welcome Message Section ===== -->
         <h1 id="newGreeting">Welcome!</h1>
         <button onclick="changeNewGreeting()" title="Click to change welcome message">Change Welcome</button>
         
-        <!-- Original Hello World Section -->
+        <!-- ===== Hello World Section ===== -->
         <h1 id="greeting">Hello World!</h1>
         <button onclick="changeGreeting()" title="Click to change language">Click me!</button>
 
-        <!-- Navigation Buttons - Two Different Methods -->
+        <!-- ===== Navigation Section ===== -->
+        <!-- Button Navigation Method -->
         <button onclick="window.location.href='about.html'">View All Greetings</button>
+        <!-- Link Navigation Method (Alternative) -->
         <a href="about.html" class="link-button">View All Greetings (Alternative)</a>
     </div>
+
+    <!-- ===== JavaScript Import ===== -->
     <script src="script.js"></script>
 </body>
 </html> 
