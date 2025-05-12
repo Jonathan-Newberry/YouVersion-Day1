@@ -13,14 +13,7 @@ async function getThunderScore() {
         console.log('ESPN API data:', data);
         
         // Debug log the events
-        console.log('All events:', data.events.map(event => ({
-            name: event.name,
-            teams: event.competitions[0].competitors.map(comp => ({
-                abbreviation: comp.team.abbreviation,
-                score: comp.score,
-                homeAway: comp.homeAway
-            }))
-        })));
+        console.log('All events:', data.events);
         
         const thunderGame = data.events.find(event => {
             const competitors = event.competitions[0].competitors;
@@ -34,16 +27,8 @@ async function getThunderScore() {
             const awayTeam = competition.competitors.find(team => team.homeAway === 'away');
             
             // Debug log the team data
-            console.log('Home team:', {
-                abbreviation: homeTeam.team.abbreviation,
-                score: homeTeam.score,
-                homeAway: homeTeam.homeAway
-            });
-            console.log('Away team:', {
-                abbreviation: awayTeam.team.abbreviation,
-                score: awayTeam.score,
-                homeAway: awayTeam.homeAway
-            });
+            console.log('Home team:', homeTeam);
+            console.log('Away team:', awayTeam);
             
             const homeScore = parseInt(homeTeam.score) || 0;
             const awayScore = parseInt(awayTeam.score) || 0;
@@ -86,34 +71,27 @@ async function getThunderScore() {
         
         if (recentGame) {
             console.log('Found recent game:', recentGame);
-            console.log('Recent game full competition data:', recentGame.competitions[0]);
-            
             const competition = recentGame.competitions[0];
-            console.log('Recent game competitors:', competition.competitors);
+            console.log('Competition:', competition);
             
-            const homeTeam = competition.competitors.find(team => team.homeAway === 'home');
-            const awayTeam = competition.competitors.find(team => team.homeAway === 'away');
+            // Get competitors array
+            const competitors = competition.competitors;
+            console.log('Competitors:', competitors);
             
-            console.log('Recent game parsed teams:', {
-                home: {
-                    team: homeTeam.team,
-                    score: homeTeam.score,
-                    homeAway: homeTeam.homeAway
-                },
-                away: {
-                    team: awayTeam.team,
-                    score: awayTeam.score,
-                    homeAway: awayTeam.homeAway
-                }
-            });
+            // Find home and away teams
+            const homeTeam = competitors.find(team => team.homeAway === 'home');
+            const awayTeam = competitors.find(team => team.homeAway === 'away');
+            
+            console.log('Home team data:', homeTeam);
+            console.log('Away team data:', awayTeam);
             
             const gameDate = new Date(recentGame.date).toLocaleDateString();
             
-            // Extract team data
-            const homeAbbrev = homeTeam.team.abbreviation || 'HOME';
-            const awayAbbrev = awayTeam.team.abbreviation || 'AWAY';
-            const homeScore = homeTeam.score || '0';
-            const awayScore = awayTeam.score || '0';
+            // Get team data
+            const homeAbbrev = homeTeam?.team?.abbreviation || 'HOME';
+            const awayAbbrev = awayTeam?.team?.abbreviation || 'AWAY';
+            const homeScore = homeTeam?.score || '0';
+            const awayScore = awayTeam?.score || '0';
             
             return {
                 hasGame: false,
