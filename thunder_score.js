@@ -17,7 +17,8 @@ async function getThunderScore() {
             name: event.name,
             teams: event.competitions[0].competitors.map(comp => ({
                 abbreviation: comp.team.abbreviation,
-                score: comp.score
+                score: comp.score,
+                homeAway: comp.homeAway
             }))
         })));
         
@@ -33,23 +34,36 @@ async function getThunderScore() {
             const awayTeam = competition.competitors.find(team => team.homeAway === 'away');
             
             // Debug log the team data
-            console.log('Home team:', homeTeam);
-            console.log('Away team:', awayTeam);
+            console.log('Home team:', {
+                abbreviation: homeTeam.team.abbreviation,
+                score: homeTeam.score,
+                homeAway: homeTeam.homeAway
+            });
+            console.log('Away team:', {
+                abbreviation: awayTeam.team.abbreviation,
+                score: awayTeam.score,
+                homeAway: awayTeam.homeAway
+            });
+            
+            const homeScore = parseInt(homeTeam.score) || 0;
+            const awayScore = parseInt(awayTeam.score) || 0;
+            const homeAbbrev = homeTeam.team.abbreviation;
+            const awayAbbrev = awayTeam.team.abbreviation;
             
             if (thunderGame.status.type.completed) {
                 return {
                     hasGame: true,
-                    score: `${awayTeam.team.abbreviation} ${awayTeam.score || 0} - ${homeTeam.team.abbreviation} ${homeTeam.score || 0} (Final)`
+                    score: `${awayAbbrev} ${awayScore} - ${homeAbbrev} ${homeScore} (Final)`
                 };
             } else if (thunderGame.status.type.state === 'in') {
                 return {
                     hasGame: true,
-                    score: `${awayTeam.team.abbreviation} ${awayTeam.score || 0} - ${homeTeam.team.abbreviation} ${homeTeam.score || 0} (${thunderGame.status.type.detail})`
+                    score: `${awayAbbrev} ${awayScore} - ${homeAbbrev} ${homeScore} (${thunderGame.status.type.detail})`
                 };
             } else {
                 return {
                     hasGame: true,
-                    score: `${awayTeam.team.abbreviation} vs ${homeTeam.team.abbreviation} - Game starts at ${thunderGame.status.type.shortDetail}`
+                    score: `${awayAbbrev} vs ${homeAbbrev} - Game starts at ${thunderGame.status.type.shortDetail}`
                 };
             }
         }
@@ -78,12 +92,25 @@ async function getThunderScore() {
             const gameDate = new Date(recentGame.date).toLocaleDateString();
             
             // Debug log the recent game data
-            console.log('Recent game home team:', homeTeam);
-            console.log('Recent game away team:', awayTeam);
+            console.log('Recent game home team:', {
+                abbreviation: homeTeam.team.abbreviation,
+                score: homeTeam.score,
+                homeAway: homeTeam.homeAway
+            });
+            console.log('Recent game away team:', {
+                abbreviation: awayTeam.team.abbreviation,
+                score: awayTeam.score,
+                homeAway: awayTeam.homeAway
+            });
+            
+            const homeScore = parseInt(homeTeam.score) || 0;
+            const awayScore = parseInt(awayTeam.score) || 0;
+            const homeAbbrev = homeTeam.team.abbreviation;
+            const awayAbbrev = awayTeam.team.abbreviation;
             
             return {
                 hasGame: false,
-                score: `No Thunder game scheduled for today\nLast game (${gameDate}):\n${awayTeam.team.abbreviation} ${awayTeam.score || 0} - ${homeTeam.team.abbreviation} ${homeTeam.score || 0} (Final)`
+                score: `No Thunder game scheduled for today\nLast game (${gameDate}):\n${awayAbbrev} ${awayScore} - ${homeAbbrev} ${homeScore} (Final)`
             };
         }
         
