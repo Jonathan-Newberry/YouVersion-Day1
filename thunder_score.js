@@ -1,6 +1,7 @@
 // Function to get latest Thunder score
 async function getThunderScore() {
     try {
+        console.log('Attempting to fetch from NBA API...');
         // NBA Stats API endpoint with headers
         const response = await fetch('https://cdn.nba.com/static/json/liveData/scoreboard/todaysScoreboard_00.json', {
             headers: {
@@ -12,10 +13,12 @@ async function getThunderScore() {
         });
         
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            throw new Error(`NBA API HTTP error! status: ${response.status}`);
         }
         
+        console.log('NBA API response received, parsing JSON...');
         const data = await response.json();
+        console.log('NBA API data:', data);
         
         // Find Thunder game
         const thunderGame = data.scoreboard.games.find(game => 
@@ -23,6 +26,7 @@ async function getThunderScore() {
         );
         
         if (thunderGame) {
+            console.log('Thunder game found:', thunderGame);
             // Format the score based on game status
             if (thunderGame.gameStatus === 1) {
                 // Game hasn't started
@@ -35,14 +39,23 @@ async function getThunderScore() {
                 return `${thunderGame.awayTeam.teamTricode} ${thunderGame.awayTeam.score} - ${thunderGame.homeTeam.teamTricode} ${thunderGame.homeTeam.score} (Final)`;
             }
         } else {
+            console.log('No Thunder game found in NBA API data');
             return "No Thunder game scheduled for today";
         }
     } catch (error) {
-        console.error('Error fetching score:', error);
+        console.error('Error with NBA API:', error);
         // Let's use a backup API if the first one fails
         try {
+            console.log('Attempting to fetch from ESPN API...');
             const response = await fetch('https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard');
+            
+            if (!response.ok) {
+                throw new Error(`ESPN API HTTP error! status: ${response.status}`);
+            }
+            
+            console.log('ESPN API response received, parsing JSON...');
             const data = await response.json();
+            console.log('ESPN API data:', data);
             
             const thunderGame = data.events.find(event => 
                 event.name.includes('Thunder') || 
@@ -51,6 +64,7 @@ async function getThunderScore() {
             );
             
             if (thunderGame) {
+                console.log('Thunder game found in ESPN data:', thunderGame);
                 const competition = thunderGame.competitions[0];
                 const homeTeam = competition.competitors.find(team => team.homeAway === 'home');
                 const awayTeam = competition.competitors.find(team => team.homeAway === 'away');
@@ -63,10 +77,11 @@ async function getThunderScore() {
                     return `${awayTeam.team.abbreviation} vs ${homeTeam.team.abbreviation} - Game starts at ${thunderGame.status.type.shortDetail}`;
                 }
             }
+            console.log('No Thunder game found in ESPN API data');
             return "No Thunder game scheduled for today";
         } catch (backupError) {
-            console.error('Error fetching from backup API:', backupError);
-            return "Error fetching score. Please try again later.";
+            console.error('Error with ESPN API:', backupError);
+            return "Error fetching score. Check browser console for details.";
         }
     }
 }
