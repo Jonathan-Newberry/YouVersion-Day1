@@ -71,27 +71,36 @@ async function getThunderScore() {
         
         if (recentGame) {
             console.log('Found recent game:', recentGame);
-            const competition = recentGame.competitions[0];
-            console.log('Competition:', competition);
             
-            // Get competitors array
-            const competitors = competition.competitors;
-            console.log('Competitors:', competitors);
+            // Get the competition data
+            const competition = recentGame.competitions[0];
+            console.log('Competition data:', competition);
+            
+            // Get competitors array and log it
+            const competitors = competition.competitors || [];
+            console.log('Competitors array:', competitors);
             
             // Find home and away teams
-            const homeTeam = competitors.find(team => team.homeAway === 'home');
-            const awayTeam = competitors.find(team => team.homeAway === 'away');
+            const homeTeam = competitors.find(team => team.homeAway === 'home') || {};
+            const awayTeam = competitors.find(team => team.homeAway === 'away') || {};
             
-            console.log('Home team data:', homeTeam);
-            console.log('Away team data:', awayTeam);
+            console.log('Raw home team:', homeTeam);
+            console.log('Raw away team:', awayTeam);
             
             const gameDate = new Date(recentGame.date).toLocaleDateString();
             
-            // Get team data
-            const homeAbbrev = homeTeam?.team?.abbreviation || 'HOME';
-            const awayAbbrev = awayTeam?.team?.abbreviation || 'AWAY';
-            const homeScore = homeTeam?.score || '0';
-            const awayScore = awayTeam?.score || '0';
+            // Extract team data with fallbacks
+            const homeAbbrev = (homeTeam.team && homeTeam.team.abbreviation) || 'HOME';
+            const awayAbbrev = (awayTeam.team && awayTeam.team.abbreviation) || 'AWAY';
+            const homeScore = homeTeam.score || '0';
+            const awayScore = awayTeam.score || '0';
+            
+            console.log('Extracted data:', {
+                homeAbbrev,
+                awayAbbrev,
+                homeScore,
+                awayScore
+            });
             
             return {
                 hasGame: false,
