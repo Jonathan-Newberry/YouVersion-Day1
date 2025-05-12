@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OKC Thunder Score</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #007ac1; /* Thunder Blue */
+        }
+        .score-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .score {
+            font-size: 2rem;
+            margin: 1rem 0;
+            color: #ef3b24; /* Thunder Orange */
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007ac1;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #ef3b24;
+        }
+        .back-button {
+            background-color: #666;
+        }
+        .back-button:hover {
+            background-color: #444;
+        }
+    </style>
+</head>
+<body>
+    <div class="score-container">
+        <h1>Latest Thunder Score</h1>
+        <div id="score" class="score">Loading...</div>
+        <div>
+            <button onclick="refreshScore()">Refresh Score</button>
+            <button onclick="window.location.href='index.html'" class="back-button">Back to Home</button>
+        </div>
+    </div>
+
+    <script src="thunder_score.js"></script>
+    <script>
+        // Note: This is a frontend example. In a real app, you'd need to:
+        // 1. Use a backend server to make API calls
+        // 2. Never expose API keys in frontend code
+        async function refreshScore() {
+            const score = await getThunderScore();
+            document.getElementById('score').textContent = score;
+        }
+
+        // Load score when page loads
+        refreshScore();
+    </script>
+</body>
+</html> 
