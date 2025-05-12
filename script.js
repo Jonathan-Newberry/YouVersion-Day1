@@ -5,7 +5,8 @@ const greetings = [
     "Hallo Welt!",
     "Ciao Mondo!",
     "こんにちは世界！",
-    "안녕하세요 세계!"
+    "안녕하세요 세계!",
+    "Olá Mundo!"
 ];
 
 let currentIndex = 0;
