@@ -11,7 +11,11 @@ const greetings = [
     "Привет, мир!"
 ];
 
-let currentIndex = 0;
+// This would cause an error:
+// greetings = ["New array"]; // Can't reassign a const!
+
+// But we can modify the array:
+// greetings.push("New greeting"); // This is allowed
 
 function changeGreeting() {
     const greetingElement = document.getElementById('greeting');
