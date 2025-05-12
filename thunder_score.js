@@ -86,27 +86,34 @@ async function getThunderScore() {
         
         if (recentGame) {
             console.log('Found recent game:', recentGame);
+            console.log('Recent game full competition data:', recentGame.competitions[0]);
+            
             const competition = recentGame.competitions[0];
+            console.log('Recent game competitors:', competition.competitors);
+            
             const homeTeam = competition.competitors.find(team => team.homeAway === 'home');
             const awayTeam = competition.competitors.find(team => team.homeAway === 'away');
+            
+            console.log('Recent game parsed teams:', {
+                home: {
+                    team: homeTeam.team,
+                    score: homeTeam.score,
+                    homeAway: homeTeam.homeAway
+                },
+                away: {
+                    team: awayTeam.team,
+                    score: awayTeam.score,
+                    homeAway: awayTeam.homeAway
+                }
+            });
+            
             const gameDate = new Date(recentGame.date).toLocaleDateString();
             
-            // Debug log the recent game data
-            console.log('Recent game home team:', {
-                abbreviation: homeTeam.team.abbreviation,
-                score: homeTeam.score,
-                homeAway: homeTeam.homeAway
-            });
-            console.log('Recent game away team:', {
-                abbreviation: awayTeam.team.abbreviation,
-                score: awayTeam.score,
-                homeAway: awayTeam.homeAway
-            });
-            
-            const homeScore = parseInt(homeTeam.score) || 0;
-            const awayScore = parseInt(awayTeam.score) || 0;
-            const homeAbbrev = homeTeam.team.abbreviation;
-            const awayAbbrev = awayTeam.team.abbreviation;
+            // Extract team data
+            const homeAbbrev = homeTeam.team.abbreviation || 'HOME';
+            const awayAbbrev = awayTeam.team.abbreviation || 'AWAY';
+            const homeScore = homeTeam.score || '0';
+            const awayScore = awayTeam.score || '0';
             
             return {
                 hasGame: false,
