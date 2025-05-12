@@ -1,3 +1,4 @@
+/* General Page Styling */
 body {
     margin: 0;
     padding: 0;
@@ -5,19 +6,24 @@ body {
     background-color: #f0f2f5;
 }
 
+/* Container Layout - Updated for multiple sections */
 .container {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     height: 100vh;
+    gap: 20px;  /* Added spacing for multiple sections */
 }
 
+/* Heading Styles */
 h1 {
     color: #1a73e8;
+    margin: 0;  /* Reset margin for consistent spacing */
     margin-bottom: 20px;
 }
 
+/* Button Styling */
 button {
     padding: 10px 20px;
     font-size: 16px;
