@@ -27,14 +27,34 @@ h1 {
 button {
     padding: 10px 20px;
     font-size: 16px;
-    background-color: #1a73e8;
+    background-color: #1a73e8;  /* Starting blue color */
     color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    transition: background-color 0.3s;
+    transition: all 0.5s ease;  /* Smooth transition for all properties */
 }
 
 button:hover {
-    background-color: #1557b0;
+    background-color: #000000;  /* Fade to black */
+    transform: scale(1.05);  /* Slight grow effect */
+}
+
+/* Welcome Button Specific Style */
+button:first-of-type {
+    background-color: #34a853;  /* Google green */
+}
+
+button:first-of-type:hover {
+    background-color: #2d8544;  /* Darker green */
+    transform: scale(1.05);  /* Makes button slightly bigger */
+}
+
+/* Hello World Button Specific Style */
+button:last-of-type {
+    background-color: #1a73e8;  /* Original blue */
+}
+
+button:last-of-type:hover {
+    background-color: #1557b0;  /* Darker blue */
 } 
