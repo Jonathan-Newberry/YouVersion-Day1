@@ -32,17 +32,17 @@ async function getThunderScore() {
             if (thunderGame.status.type.completed) {
                 return {
                     hasGame: true,
-                    score: `${awayTeam.team.abbreviation} ${awayTeam.score} - ${homeTeam.team.abbreviation} ${homeTeam.score} (Final)`
+                    score: `${awayTeam.team.name} ${awayTeam.score} - ${homeTeam.team.name} ${homeTeam.score} (Final)`
                 };
             } else if (thunderGame.status.type.state === 'in') {
                 return {
                     hasGame: true,
-                    score: `${awayTeam.team.abbreviation} ${awayTeam.score} - ${homeTeam.team.abbreviation} ${homeTeam.score} (${thunderGame.status.type.detail})`
+                    score: `${awayTeam.team.name} ${awayTeam.score} - ${homeTeam.team.name} ${homeTeam.score} (${thunderGame.status.type.detail})`
                 };
             } else {
                 return {
                     hasGame: true,
-                    score: `${awayTeam.team.abbreviation} vs ${homeTeam.team.abbreviation} - Game starts at ${thunderGame.status.type.shortDetail}`
+                    score: `${awayTeam.team.name} vs ${homeTeam.team.name} - Game starts at ${thunderGame.status.type.shortDetail}`
                 };
             }
         }
@@ -72,7 +72,7 @@ async function getThunderScore() {
             
             return {
                 hasGame: false,
-                score: `No Thunder game scheduled for today\nLast game (${gameDate}):\n${awayTeam.team.abbreviation} ${awayTeam.score} - ${homeTeam.team.abbreviation} ${homeTeam.score} (Final)`
+                score: `No Thunder game scheduled for today\nLast game (${gameDate}):\n${awayTeam.team.name} ${awayTeam.score} - ${homeTeam.team.name} ${homeTeam.score} (Final)`
             };
         }
         
