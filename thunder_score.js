@@ -30,8 +30,8 @@ async function getThunderScore() {
             console.log('Home team:', homeTeam);
             console.log('Away team:', awayTeam);
             
-            const homeScore = parseInt(homeTeam.score) || 0;
-            const awayScore = parseInt(awayTeam.score) || 0;
+            const homeScore = homeTeam.score.displayValue || '0';
+            const awayScore = awayTeam.score.displayValue || '0';
             const homeAbbrev = homeTeam.team.abbreviation;
             const awayAbbrev = awayTeam.team.abbreviation;
             
@@ -90,10 +90,10 @@ async function getThunderScore() {
             const gameDate = new Date(recentGame.date).toLocaleDateString();
             
             // Extract team data with fallbacks
-            const homeAbbrev = (homeTeam.team && homeTeam.team.abbreviation) || 'HOME';
-            const awayAbbrev = (awayTeam.team && awayTeam.team.abbreviation) || 'AWAY';
-            const homeScore = homeTeam.score || '0';
-            const awayScore = awayTeam.score || '0';
+            const homeAbbrev = homeTeam.team.abbreviation || 'HOME';
+            const awayAbbrev = awayTeam.team.abbreviation || 'AWAY';
+            const homeScore = homeTeam.score.displayValue || '0';
+            const awayScore = awayTeam.score.displayValue || '0';
             
             console.log('Extracted data:', {
                 homeAbbrev,
