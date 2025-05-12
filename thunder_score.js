@@ -25,17 +25,54 @@ async function getThunderScore() {
             const awayTeam = competition.competitors.find(team => team.homeAway === 'away');
             
             if (thunderGame.status.type.completed) {
-                return `${awayTeam.team.abbreviation} ${awayTeam.score} - ${homeTeam.team.abbreviation} ${homeTeam.score} (Final)`;
+                return {
+                    hasGame: true,
+                    score: `${awayTeam.team.abbreviation} ${awayTeam.score} - ${homeTeam.team.abbreviation} ${homeTeam.score} (Final)`
+                };
             } else if (thunderGame.status.type.state === 'in') {
-                return `${awayTeam.team.abbreviation} ${awayTeam.score} - ${homeTeam.team.abbreviation} ${homeTeam.score} (${thunderGame.status.type.detail})`;
+                return {
+                    hasGame: true,
+                    score: `${awayTeam.team.abbreviation} ${awayTeam.score} - ${homeTeam.team.abbreviation} ${homeTeam.score} (${thunderGame.status.type.detail})`
+                };
             } else {
-                return `${awayTeam.team.abbreviation} vs ${homeTeam.team.abbreviation} - Game starts at ${thunderGame.status.type.shortDetail}`;
+                return {
+                    hasGame: true,
+                    score: `${awayTeam.team.abbreviation} vs ${homeTeam.team.abbreviation} - Game starts at ${thunderGame.status.type.shortDetail}`
+                };
             }
         }
-        console.log('No Thunder game found in ESPN data');
-        return "No Thunder game scheduled for today";
+        
+        // If no game today, fetch recent games
+        console.log('No game today, fetching recent games...');
+        const recentResponse = await fetch('https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/OKC/schedule');
+        const recentData = await recentResponse.json();
+        
+        // Find the most recent completed game
+        const recentGame = recentData.events.reverse().find(event => 
+            event.competitions[0].status.type.completed
+        );
+        
+        if (recentGame) {
+            const competition = recentGame.competitions[0];
+            const homeTeam = competition.competitors.find(team => team.homeAway === 'home');
+            const awayTeam = competition.competitors.find(team => team.homeAway === 'away');
+            const gameDate = new Date(recentGame.date).toLocaleDateString();
+            
+            return {
+                hasGame: false,
+                score: `No Thunder game scheduled for today\nLast game (${gameDate}):\n${awayTeam.team.abbreviation} ${awayTeam.score} - ${homeTeam.team.abbreviation} ${homeTeam.score} (Final)`
+            };
+        }
+        
+        return {
+            hasGame: false,
+            score: "No Thunder game scheduled for today"
+        };
     } catch (error) {
         console.error('Error with ESPN API:', error);
-        return "Error fetching score. Check browser console for details.";
+        return {
+            hasGame: false,
+            score: "Error fetching score. Check browser console for details."
+        };
     }
 } 
