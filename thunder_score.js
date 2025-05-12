@@ -89,11 +89,13 @@ async function getThunderScore() {
             
             const gameDate = new Date(recentGame.date).toLocaleDateString();
             
-            // Extract team data with fallbacks
+            // Get team abbreviations
             const homeAbbrev = homeTeam.team?.abbreviation || 'HOME';
             const awayAbbrev = awayTeam.team?.abbreviation || 'AWAY';
-            const homeScore = homeTeam.score?.displayValue || '0';
-            const awayScore = awayTeam.score?.displayValue || '0';
+            
+            // Get scores from the value property
+            const homeScore = homeTeam.score?.value || '0';
+            const awayScore = awayTeam.score?.value || '0';
             
             console.log('Extracted data:', {
                 homeAbbrev,
