@@ -1,88 +1,42 @@
 // Function to get latest Thunder score
 async function getThunderScore() {
     try {
-        console.log('Attempting to fetch from NBA API...');
-        // NBA Stats API endpoint with headers
-        const response = await fetch('https://cdn.nba.com/static/json/liveData/scoreboard/todaysScoreboard_00.json', {
-            headers: {
-                'Accept': 'application/json',
-                'User-Agent': 'Mozilla/5.0',
-                'Origin': window.location.origin,
-                'Referer': window.location.href
-            }
-        });
+        console.log('Attempting to fetch from ESPN API...');
+        const response = await fetch('https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard');
         
         if (!response.ok) {
-            throw new Error(`NBA API HTTP error! status: ${response.status}`);
+            throw new Error(`ESPN API HTTP error! status: ${response.status}`);
         }
         
-        console.log('NBA API response received, parsing JSON...');
+        console.log('ESPN API response received, parsing JSON...');
         const data = await response.json();
-        console.log('NBA API data:', data);
+        console.log('ESPN API data:', data);
         
-        // Find Thunder game
-        const thunderGame = data.scoreboard.games.find(game => 
-            game.awayTeam.teamTricode === 'OKC' || game.homeTeam.teamTricode === 'OKC'
+        const thunderGame = data.events.find(event => 
+            event.name.includes('Thunder') || 
+            (event.competitions[0].competitors[0].team.abbreviation === 'OKC' || 
+             event.competitions[0].competitors[1].team.abbreviation === 'OKC')
         );
         
         if (thunderGame) {
             console.log('Thunder game found:', thunderGame);
-            // Format the score based on game status
-            if (thunderGame.gameStatus === 1) {
-                // Game hasn't started
-                return `${thunderGame.awayTeam.teamTricode} vs ${thunderGame.homeTeam.teamTricode} - Game starts at ${thunderGame.gameStatusText}`;
-            } else if (thunderGame.gameStatus === 2) {
-                // Game in progress
-                return `${thunderGame.awayTeam.teamTricode} ${thunderGame.awayTeam.score} - ${thunderGame.homeTeam.teamTricode} ${thunderGame.homeTeam.score} (${thunderGame.gameStatusText})`;
+            const competition = thunderGame.competitions[0];
+            const homeTeam = competition.competitors.find(team => team.homeAway === 'home');
+            const awayTeam = competition.competitors.find(team => team.homeAway === 'away');
+            
+            if (thunderGame.status.type.completed) {
+                return `${awayTeam.team.abbreviation} ${awayTeam.score} - ${homeTeam.team.abbreviation} ${homeTeam.score} (Final)`;
+            } else if (thunderGame.status.type.state === 'in') {
+                return `${awayTeam.team.abbreviation} ${awayTeam.score} - ${homeTeam.team.abbreviation} ${homeTeam.score} (${thunderGame.status.type.detail})`;
             } else {
-                // Game finished
-                return `${thunderGame.awayTeam.teamTricode} ${thunderGame.awayTeam.score} - ${thunderGame.homeTeam.teamTricode} ${thunderGame.homeTeam.score} (Final)`;
+                return `${awayTeam.team.abbreviation} vs ${homeTeam.team.abbreviation} - Game starts at ${thunderGame.status.type.shortDetail}`;
             }
-        } else {
-            console.log('No Thunder game found in NBA API data');
-            return "No Thunder game scheduled for today";
         }
+        console.log('No Thunder game found in ESPN data');
+        return "No Thunder game scheduled for today";
     } catch (error) {
-        console.error('Error with NBA API:', error);
-        // Let's use a backup API if the first one fails
-        try {
-            console.log('Attempting to fetch from ESPN API...');
-            const response = await fetch('https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard');
-            
-            if (!response.ok) {
-                throw new Error(`ESPN API HTTP error! status: ${response.status}`);
-            }
-            
-            console.log('ESPN API response received, parsing JSON...');
-            const data = await response.json();
-            console.log('ESPN API data:', data);
-            
-            const thunderGame = data.events.find(event => 
-                event.name.includes('Thunder') || 
-                (event.competitions[0].competitors[0].team.abbreviation === 'OKC' || 
-                 event.competitions[0].competitors[1].team.abbreviation === 'OKC')
-            );
-            
-            if (thunderGame) {
-                console.log('Thunder game found in ESPN data:', thunderGame);
-                const competition = thunderGame.competitions[0];
-                const homeTeam = competition.competitors.find(team => team.homeAway === 'home');
-                const awayTeam = competition.competitors.find(team => team.homeAway === 'away');
-                
-                if (thunderGame.status.type.completed) {
-                    return `${awayTeam.team.abbreviation} ${awayTeam.score} - ${homeTeam.team.abbreviation} ${homeTeam.score} (Final)`;
-                } else if (thunderGame.status.type.state === 'in') {
-                    return `${awayTeam.team.abbreviation} ${awayTeam.score} - ${homeTeam.team.abbreviation} ${homeTeam.score} (${thunderGame.status.type.detail})`;
-                } else {
-                    return `${awayTeam.team.abbreviation} vs ${homeTeam.team.abbreviation} - Game starts at ${thunderGame.status.type.shortDetail}`;
-                }
-            }
-            console.log('No Thunder game found in ESPN API data');
-            return "No Thunder game scheduled for today";
-        } catch (backupError) {
-            console.error('Error with ESPN API:', backupError);
-            return "Error fetching score. Check browser console for details.";
-        }
+        console.error('Error with ESPN API:', error);
+        return "Error fetching score. Check browser console for details.";
     }
 }
 
