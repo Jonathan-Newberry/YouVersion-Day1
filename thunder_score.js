@@ -12,11 +12,16 @@ async function getThunderScore() {
         const data = await response.json();
         console.log('ESPN API data:', data);
         
-        const thunderGame = data.events.find(event => 
-            event.name.includes('Thunder') || 
-            (event.competitions[0].competitors[0].team.abbreviation === 'OKC' || 
-             event.competitions[0].competitors[1].team.abbreviation === 'OKC')
-        );
+        // Debug log the events
+        console.log('All events:', data.events.map(event => ({
+            name: event.name,
+            teams: event.competitions[0].competitors.map(comp => comp.team.abbreviation)
+        })));
+        
+        const thunderGame = data.events.find(event => {
+            const competitors = event.competitions[0].competitors;
+            return competitors.some(comp => comp.team.abbreviation === 'OKC');
+        });
         
         if (thunderGame) {
             console.log('Thunder game found:', thunderGame);
@@ -43,9 +48,15 @@ async function getThunderScore() {
         }
         
         // If no game today, fetch recent games
-        console.log('No game today, fetching recent games...');
+        console.log('No Thunder game today, fetching recent games...');
         const recentResponse = await fetch('https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/OKC/schedule');
+        
+        if (!recentResponse.ok) {
+            throw new Error(`ESPN Schedule API HTTP error! status: ${recentResponse.status}`);
+        }
+        
         const recentData = await recentResponse.json();
+        console.log('Recent games data:', recentData);
         
         // Find the most recent completed game
         const recentGame = recentData.events.reverse().find(event => 
@@ -53,6 +64,7 @@ async function getThunderScore() {
         );
         
         if (recentGame) {
+            console.log('Found recent game:', recentGame);
             const competition = recentGame.competitions[0];
             const homeTeam = competition.competitors.find(team => team.homeAway === 'home');
             const awayTeam = competition.competitors.find(team => team.homeAway === 'away');
