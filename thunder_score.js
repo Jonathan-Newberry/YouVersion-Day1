@@ -11,14 +11,16 @@ async function getThunderScore() {
         
         const scheduleData = await scheduleResponse.json();
         
-        // Immediately log the raw data
+        // Log the entire response immediately
         console.log('Raw Schedule API response:', JSON.stringify(scheduleData, null, 2));
-        console.log('Schedule API events length:', scheduleData.events?.length);
         
-        if (!scheduleData.events) {
-            console.log('No events found in schedule data');
+        // Validate and log the events array
+        if (!scheduleData || !scheduleData.events) {
+            console.log('Invalid or missing events in schedule data:', scheduleData);
             throw new Error('No events data in schedule response');
         }
+        
+        console.log('Schedule API events length:', scheduleData.events.length);
         
         // Find today's game from schedule
         const today = new Date();
@@ -26,12 +28,12 @@ async function getThunderScore() {
         
         let todayGame = null;
         
-        // Log each event as we check it
+        // Log and process each event
         for (const event of scheduleData.events) {
             // Log the raw event first
             console.log('Raw schedule event:', JSON.stringify(event, null, 2));
             
-            if (!event.date) {
+            if (!event || !event.date) {
                 console.log('Event missing date:', event);
                 continue;
             }
@@ -56,7 +58,7 @@ async function getThunderScore() {
             console.log('Processing today\'s game:', {
                 date: todayGame.date,
                 name: todayGame.name,
-                status: todayGame.status
+                rawStatus: todayGame.status
             });
             
             const competition = todayGame.competitions?.[0];
@@ -82,6 +84,7 @@ async function getThunderScore() {
             const status = todayGame.status || {};
             console.log('Game status:', status);
             
+            // Check if status.type exists, if not use status directly
             const gameState = status.state || (status.type && status.type.state) || '';
             const isCompleted = status.completed || (status.type && status.type.completed) || false;
             
@@ -130,7 +133,7 @@ async function getThunderScore() {
             console.log('Processing most recent game:', {
                 date: recentGame.date,
                 name: recentGame.name,
-                status: recentGame.status
+                rawStatus: recentGame.status
             });
             
             const competition = recentGame.competitions?.[0];
