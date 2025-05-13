@@ -37,13 +37,13 @@ body {
 
 .recent-score {
     font-size: 1.8rem;
-    color: #666;
     margin: 2rem 0;
+    color: #ef3b24; /* Thunder Orange - match today's game color */
     white-space: pre-line; /* Preserve line breaks */
 }
 
 .recent-header {
-    font-size: 1.5rem;
+    font-size: 1.8rem; /* Match score-header size */
     color: #007ac1;
     margin-top: 2rem;
     margin-bottom: 1rem;
