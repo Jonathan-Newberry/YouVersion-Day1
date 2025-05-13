@@ -3,13 +3,22 @@ document.addEventListener('DOMContentLoaded', async function() {
     const serverCounter = document.getElementById('serverCounter');
     
     try {
-        // Fetch and increment counter from server
-        const response = await fetch('http://localhost:3000/api/counter');
-        const data = await response.json();
+        // First get current count without incrementing
+        const currentResponse = await fetch('http://localhost:3000/api/counter/current');
+        const currentData = await currentResponse.json();
         
-        // Update the display
+        // Update display with current count
         if (serverCounter) {
-            serverCounter.textContent = data.count;
+            serverCounter.textContent = currentData.count;
+        }
+        
+        // Then increment the counter
+        const incrementResponse = await fetch('http://localhost:3000/api/counter');
+        const incrementData = await incrementResponse.json();
+        
+        // Update display with new count
+        if (serverCounter) {
+            serverCounter.textContent = incrementData.count;
         }
     } catch (error) {
         console.error('Error updating server counter:', error);
