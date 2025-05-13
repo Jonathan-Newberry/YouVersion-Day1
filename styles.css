@@ -143,35 +143,23 @@ button:last-of-type:hover {
 }
 
 .score-container {
-    background: white;
-    padding: 3rem;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    text-align: center;
-    min-height: 300px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    min-width: 400px;
+    /* These styles should only be in thunderstyles.css */
+    display: none;
 }
 
 .score-header {
-    font-size: 1.8rem;
-    color: #007ac1;
-    margin-bottom: 1.5rem;
+    /* These styles should only be in thunderstyles.css */
+    display: none;
 }
 
 .score {
-    font-size: 2rem;
-    margin: 2rem 0;
-    color: #ef3b24; /* Thunder Orange */
-    white-space: pre-line; /* Preserve line breaks */
+    /* These styles should only be in thunderstyles.css */
+    display: none;
 }
 
 .recent-score {
-    font-size: 1.8rem;
-    color: #666;
-    margin: 2rem 0;
+    /* These styles should only be in thunderstyles.css */
+    display: none;
 }
 
 .button-container {
