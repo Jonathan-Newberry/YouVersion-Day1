@@ -56,35 +56,32 @@
                 recentScoreElement.style.display = 'none';
                 recentHeaderElement.style.display = 'none';
                 
-                // Update header based on whether it's a current or recent game
-                headerElement.textContent = result.hasGame ? 'Thunder Games:' : 'Latest Thunder Score:';
+                // Update header
+                headerElement.textContent = 'Thunder Games:';
                 
-                // If there's a game today, show it
-                if (result.hasGame) {
+                // Show today's game if available
+                if (todayGame && todayGame !== "No Thunder game today") {
                     todayScoreElement.textContent = todayGame;
                     todayScoreElement.style.display = 'block';
                 }
                 
-                // If there's a recent game, show it
+                // Always show recent game section if we have a recent game
                 if (recentGame) {
                     recentHeaderElement.style.display = 'block';
                     recentScoreElement.textContent = recentGame;
                     recentScoreElement.style.display = 'block';
                 }
                 
-                // If there's no today's game but there is a recent game
-                if (!result.hasGame && recentGame) {
-                    todayScoreElement.style.display = 'none';
-                } else if (!result.hasGame && !recentGame) {
-                    // If there are no games at all
-                    todayScoreElement.textContent = result.score;
+                // If no games at all, show the no games message
+                if (!todayGame && !recentGame) {
+                    todayScoreElement.textContent = "No Thunder games found";
                     todayScoreElement.style.display = 'block';
                 }
                 
                 console.log('Updated score elements:', {
                     today: todayScoreElement.textContent,
                     recent: recentScoreElement.textContent,
-                    hasGame: result.hasGame,
+                    hasGame: !!todayGame,
                     hasRecentGame: !!recentGame
                 });
             } catch (error) {

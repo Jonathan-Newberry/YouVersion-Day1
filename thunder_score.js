@@ -111,9 +111,9 @@ async function getThunderScore() {
         if (todayGameMessage && recentGameMessage) {
             finalMessage = `${todayGameMessage}\n\n${recentGameMessage}`;
         } else if (todayGameMessage) {
-            finalMessage = todayGameMessage;
+            finalMessage = `${todayGameMessage}\n\n${recentGameMessage || "No recent game data available"}`;
         } else if (recentGameMessage) {
-            finalMessage = recentGameMessage;
+            finalMessage = `No Thunder game today\n\n${recentGameMessage}`;
         } else {
             finalMessage = "No Thunder games found";
         }
