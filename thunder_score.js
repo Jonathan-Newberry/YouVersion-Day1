@@ -73,22 +73,28 @@ async function getThunderScore() {
             const competitors = competition.competitors || [];
             console.log('Competitors:', competitors);
             
+            // Find both home and away teams
             const homeTeam = competitors.find(team => team?.homeAway === 'home');
             const awayTeam = competitors.find(team => team?.homeAway === 'away');
             
             console.log('Teams:', { homeTeam, awayTeam });
             
+            // If either team is missing, try to parse from the game name
             if (!homeTeam?.team || !awayTeam?.team) {
-                console.log('Missing team data:', { homeTeam, awayTeam });
-                throw new Error('Invalid team data in today\'s game');
+                console.log('Missing team data, parsing from game name:', todayGame.name);
+                const [awayName, homeName] = todayGame.name.split(' at ');
+                return {
+                    hasGame: true,
+                    score: `Thunder Game Today at ${new Intl.DateTimeFormat('en-US', {
+                        hour: 'numeric',
+                        minute: '2-digit',
+                        timeZone: 'America/Chicago'
+                    }).format(new Date(todayGame.date))} Central\n${awayName} @ ${homeName}`
+                };
             }
             
             const homeAbbrev = homeTeam.team.abbreviation || 'HOME';
             const awayAbbrev = awayTeam.team.abbreviation || 'AWAY';
-            
-            // Get game state
-            const status = todayGame.status || {};
-            console.log('Game status:', status);
             
             // Format game time in Central time
             const gameDate = new Date(todayGame.date);
