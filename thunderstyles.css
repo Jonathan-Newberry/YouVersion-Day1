@@ -47,6 +47,7 @@ body {
     color: #007ac1;
     margin-top: 2rem;
     margin-bottom: 1rem;
+    display: block; /* Ensure it's visible by default */
 }
 
 .button-container {
