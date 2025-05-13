@@ -10,7 +10,6 @@ async function getThunderScore() {
         
         console.log('ESPN API response received, parsing JSON...');
         const data = await response.json();
-        console.log('ESPN API data:', data);
         
         // Debug log the events
         console.log('All events:', data.events);
@@ -22,13 +21,13 @@ async function getThunderScore() {
         
         if (thunderGame) {
             console.log('Thunder game found:', thunderGame);
+            console.log('Game status:', thunderGame.status);
+            console.log('Game state:', thunderGame.status.type.state);
+            console.log('Game completed:', thunderGame.status.type.completed);
+            
             const competition = thunderGame.competitions[0];
             const homeTeam = competition.competitors.find(team => team.homeAway === 'home');
             const awayTeam = competition.competitors.find(team => team.homeAway === 'away');
-            
-            // Debug log the team data
-            console.log('Home team:', homeTeam);
-            console.log('Away team:', awayTeam);
             
             const homeScore = homeTeam.score?.displayValue || '0';
             const awayScore = awayTeam.score?.displayValue || '0';
@@ -36,7 +35,7 @@ async function getThunderScore() {
             const awayAbbrev = awayTeam.team.abbreviation;
 
             // Check if the game hasn't started yet
-            if (!thunderGame.status.type.completed && thunderGame.status.type.state === 'pre') {
+            if (!thunderGame.status.type.completed && (thunderGame.status.type.state === 'pre' || thunderGame.status.type.state === 'scheduled')) {
                 // Convert game time to Central Time
                 const gameDate = new Date(thunderGame.date);
                 const centralTime = new Intl.DateTimeFormat('en-US', {
@@ -60,6 +59,22 @@ async function getThunderScore() {
                 return {
                     hasGame: true,
                     score: `${awayAbbrev} ${awayScore} - ${homeAbbrev} ${homeScore} (${thunderGame.status.type.detail})`
+                };
+            }
+            
+            // Fallback for any other game state
+            console.log('Unhandled game state:', thunderGame.status.type.state);
+            if (thunderGame.date) {
+                const gameDate = new Date(thunderGame.date);
+                const centralTime = new Intl.DateTimeFormat('en-US', {
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    timeZone: 'America/Chicago'
+                }).format(gameDate);
+                
+                return {
+                    hasGame: true,
+                    score: `Thunder Game Today at ${centralTime} Central\n${awayAbbrev} @ ${homeAbbrev}`
                 };
             }
         }
