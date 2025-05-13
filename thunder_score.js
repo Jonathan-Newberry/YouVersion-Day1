@@ -1,35 +1,61 @@
 // Function to get latest Thunder score
 async function getThunderScore() {
     try {
-        console.log('Attempting to fetch from ESPN API...');
-        const response = await fetch('https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard');
+        // Try the schedule endpoint first as it might have more up-to-date information
+        console.log('Attempting to fetch from ESPN Schedule API...');
+        const scheduleResponse = await fetch('https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/OKC/schedule');
         
-        if (!response.ok) {
-            throw new Error(`ESPN API HTTP error! status: ${response.status}`);
+        if (!scheduleResponse.ok) {
+            throw new Error(`ESPN Schedule API HTTP error! status: ${scheduleResponse.status}`);
         }
         
-        console.log('ESPN API response received, parsing JSON...');
-        const data = await response.json();
+        const scheduleData = await scheduleResponse.json();
+        console.log('Schedule API events:', scheduleData.events?.length);
         
-        // Debug log the events
-        console.log('Number of events found:', data.events.length);
+        // Find today's game from schedule
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
         
-        // Find Thunder game and log the search process
-        let thunderGame = null;
-        for (const event of data.events) {
+        const todayGame = scheduleData.events?.find(event => {
+            const gameDate = new Date(event.date);
+            gameDate.setHours(0, 0, 0, 0);
+            return gameDate.getTime() === today.getTime();
+        });
+        
+        if (todayGame) {
+            console.log('Found game in schedule for today:', {
+                date: new Date(todayGame.date).toLocaleString(),
+                status: todayGame.status.type.state,
+                name: todayGame.name
+            });
+        }
+        
+        // Also check the scoreboard API
+        console.log('Attempting to fetch from ESPN Scoreboard API...');
+        const scoreboardResponse = await fetch('https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard');
+        
+        if (!scoreboardResponse.ok) {
+            throw new Error(`ESPN Scoreboard API HTTP error! status: ${scoreboardResponse.status}`);
+        }
+        
+        const scoreboardData = await scoreboardResponse.json();
+        console.log('Scoreboard API events:', scoreboardData.events?.length);
+        
+        // Log all games from scoreboard for debugging
+        scoreboardData.events?.forEach(event => {
             const competitors = event.competitions[0].competitors;
-            const isThunderGame = competitors.some(comp => comp.team.abbreviation === 'OKC');
-            console.log('Checking game:', {
-                competitors: competitors.map(c => c.team.abbreviation).join(' vs '),
-                isThunderGame,
+            console.log('Game found:', {
+                teams: competitors.map(c => c.team.abbreviation).join(' vs '),
                 date: new Date(event.date).toLocaleString(),
                 status: event.status.type.state
             });
-            if (isThunderGame) {
-                thunderGame = event;
-                break;
-            }
-        }
+        });
+        
+        // Use todayGame if found in schedule, otherwise check scoreboard
+        const thunderGame = todayGame || scoreboardData.events?.find(event => {
+            const competitors = event.competitions[0].competitors;
+            return competitors.some(comp => comp.team.abbreviation === 'OKC');
+        });
         
         if (thunderGame) {
             console.log('Thunder game found:', {
@@ -84,37 +110,10 @@ async function getThunderScore() {
                     score: `${awayAbbrev} ${awayScore} - ${homeAbbrev} ${homeScore} (${thunderGame.status.type.detail})`
                 };
             }
-            
-            // Fallback for any other game state
-            console.log('Unhandled game state:', thunderGame.status.type.state);
-            if (thunderGame.date) {
-                const gameDate = new Date(thunderGame.date);
-                const centralTime = new Intl.DateTimeFormat('en-US', {
-                    hour: 'numeric',
-                    minute: '2-digit',
-                    timeZone: 'America/Chicago'
-                }).format(gameDate);
-                
-                return {
-                    hasGame: true,
-                    score: `Thunder Game Today at ${centralTime} Central\n${awayAbbrev} @ ${homeAbbrev}`
-                };
-            }
         }
         
-        // If no game today, fetch recent games
-        console.log('No Thunder game today, fetching recent games...');
-        const recentResponse = await fetch('https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/OKC/schedule');
-        
-        if (!recentResponse.ok) {
-            throw new Error(`ESPN Schedule API HTTP error! status: ${recentResponse.status}`);
-        }
-        
-        const recentData = await recentResponse.json();
-        console.log('Recent games data received');
-        
-        // Find the most recent completed game
-        const recentGame = recentData.events.reverse().find(event => 
+        // If we get here, check the most recent completed game from schedule data
+        const recentGame = scheduleData.events?.reverse().find(event => 
             event.competitions[0].status.type.completed
         );
         
