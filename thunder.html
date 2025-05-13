@@ -14,7 +14,8 @@
     <div class="score-container">
         <div>
             <h1 id="score-header" class="score-header">Thunder Score</h1>
-            <div id="score" class="score">Loading...</div>
+            <div id="today-score" class="score">Loading...</div>
+            <div id="recent-score" class="recent-score"></div>
         </div>
         <div class="button-container">
             <button onclick="refreshScore()" id="refreshButton">Refresh Score</button>
@@ -41,23 +42,41 @@
                 const result = await getThunderScore();
                 console.log('Result from getThunderScore:', result);
                 
-                const scoreElement = document.getElementById('score');
+                const todayScoreElement = document.getElementById('today-score');
+                const recentScoreElement = document.getElementById('recent-score');
                 const headerElement = document.getElementById('score-header');
                 
+                // Split the score into today's game and recent game
+                const [todayGame, recentGame] = result.score.split('\n\n');
+                
                 // Update header based on whether it's a current or recent game
-                headerElement.textContent = result.hasGame ? 'Current Thunder Score:' : 'Latest Thunder Score:';
+                headerElement.textContent = result.hasGame ? 'Thunder Games:' : 'Latest Thunder Score:';
                 console.log('Updated header:', headerElement.textContent);
                 
-                // Update score with proper styling
-                scoreElement.textContent = result.score;
-                scoreElement.className = result.hasGame ? 'score' : 'score recent-score';
-                console.log('Updated score element:', {
-                    text: scoreElement.textContent,
-                    className: scoreElement.className
+                // Update score elements
+                if (result.hasGame) {
+                    todayScoreElement.textContent = todayGame;
+                    todayScoreElement.style.display = 'block';
+                    if (recentGame) {
+                        recentScoreElement.textContent = recentGame;
+                        recentScoreElement.style.display = 'block';
+                    } else {
+                        recentScoreElement.style.display = 'none';
+                    }
+                } else {
+                    todayScoreElement.textContent = result.score;
+                    todayScoreElement.style.display = 'block';
+                    recentScoreElement.style.display = 'none';
+                }
+                
+                console.log('Updated score elements:', {
+                    today: todayScoreElement.textContent,
+                    recent: recentScoreElement.textContent
                 });
             } catch (error) {
                 console.error('Error in refreshScore:', error);
-                document.getElementById('score').textContent = 'Error loading score. Please try again.';
+                document.getElementById('today-score').textContent = 'Error loading score. Please try again.';
+                document.getElementById('recent-score').style.display = 'none';
             } finally {
                 // Re-enable the refresh button
                 const refreshButton = document.getElementById('refreshButton');
