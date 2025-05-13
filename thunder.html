@@ -48,41 +48,22 @@
                 const headerElement = document.getElementById('score-header');
                 const recentHeaderElement = document.querySelector('.recent-header');
                 
-                // Split the score into today's game and recent game
-                const [todayGame, recentGame] = result.score.split('\n\n');
-                
-                // First, hide everything
-                todayScoreElement.style.display = 'none';
-                recentScoreElement.style.display = 'none';
-                recentHeaderElement.style.display = 'none';
-                
                 // Update header
                 headerElement.textContent = 'Thunder Games:';
                 
-                // Show today's game if available
-                if (todayGame && todayGame !== "No Thunder game today") {
-                    todayScoreElement.textContent = todayGame;
-                    todayScoreElement.style.display = 'block';
-                }
+                // Show today's game
+                todayScoreElement.textContent = result.todayGame;
+                todayScoreElement.style.display = 'block';
                 
-                // Always show recent game section if we have a recent game
-                if (recentGame) {
-                    recentHeaderElement.style.display = 'block';
-                    recentScoreElement.textContent = recentGame;
-                    recentScoreElement.style.display = 'block';
-                }
-                
-                // If no games at all, show the no games message
-                if (!todayGame && !recentGame) {
-                    todayScoreElement.textContent = "No Thunder games found";
-                    todayScoreElement.style.display = 'block';
-                }
+                // Always show recent game section
+                recentHeaderElement.style.display = 'block';
+                recentScoreElement.textContent = result.recentGame;
+                recentScoreElement.style.display = 'block';
                 
                 console.log('Updated score elements:', {
                     today: todayScoreElement.textContent,
                     recent: recentScoreElement.textContent,
-                    hasGame: !!todayGame,
-                    hasRecentGame: !!recentGame
+                    hasGame: result.hasGame
                 });
             } catch (error) {
                 console.error('Error in refreshScore:', error);

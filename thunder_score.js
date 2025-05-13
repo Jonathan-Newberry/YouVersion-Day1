@@ -106,28 +106,19 @@ async function getThunderScore() {
             recentGameMessage = `${awayAbbrev} ${awayScore} - ${homeAbbrev} ${homeScore} (Final)\n${gameDate}`;
         }
 
-        // Combine messages
-        let finalMessage = "";
-        if (todayGameMessage && recentGameMessage) {
-            finalMessage = `${todayGameMessage}\n\n${recentGameMessage}`;
-        } else if (todayGameMessage) {
-            finalMessage = `${todayGameMessage}\n\n${recentGameMessage || "No recent game data available"}`;
-        } else if (recentGameMessage) {
-            finalMessage = `No Thunder game today\n\n${recentGameMessage}`;
-        } else {
-            finalMessage = "No Thunder games found";
-        }
-
+        // Return both messages separately instead of combining them
         return {
             hasGame: !!todayGameMessage,
-            score: finalMessage
+            todayGame: todayGameMessage || "No Thunder game today",
+            recentGame: recentGameMessage || "No recent game data available"
         };
     } catch (error) {
         console.error('Error with ESPN API:', error);
         console.error('Error stack:', error.stack);
         return {
             hasGame: false,
-            score: "Error fetching score. Check browser console for details."
+            todayGame: "Error fetching score. Check browser console for details.",
+            recentGame: "Error fetching score. Check browser console for details."
         };
     }
 } 
