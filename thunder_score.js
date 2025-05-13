@@ -10,27 +10,41 @@ async function getThunderScore() {
         }
         
         const scheduleData = await scheduleResponse.json();
+        console.log('Raw Schedule API response:', scheduleData);
         console.log('Schedule API events:', scheduleData.events?.length);
         
-        // Log raw schedule data for debugging
-        console.log('Raw schedule data first event:', scheduleData.events?.[0]);
+        if (!scheduleData.events) {
+            throw new Error('No events data in schedule response');
+        }
         
         // Find today's game from schedule
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         
-        const todayGame = scheduleData.events?.find(event => {
-            if (!event.date) return false;
+        let todayGame = null;
+        
+        // Log each event as we check it
+        scheduleData.events.forEach((event, index) => {
+            console.log(`Checking schedule event ${index}:`, {
+                date: event.date,
+                name: event.name,
+                status: event.status
+            });
+            
+            if (!event.date) return;
             const gameDate = new Date(event.date);
             gameDate.setHours(0, 0, 0, 0);
-            return gameDate.getTime() === today.getTime();
+            if (gameDate.getTime() === today.getTime()) {
+                todayGame = event;
+                console.log('Found matching game:', event);
+            }
         });
         
         if (todayGame) {
             console.log('Found game in schedule for today:', {
-                date: new Date(todayGame.date).toLocaleString(),
-                status: todayGame.status?.type?.state || 'unknown',
-                name: todayGame.name
+                date: todayGame.date ? new Date(todayGame.date).toLocaleString() : 'unknown',
+                name: todayGame.name,
+                rawStatus: todayGame.status // Log the raw status object
             });
         }
         
@@ -43,24 +57,34 @@ async function getThunderScore() {
         }
         
         const scoreboardData = await scoreboardResponse.json();
+        console.log('Raw Scoreboard API response:', scoreboardData);
         console.log('Scoreboard API events:', scoreboardData.events?.length);
         
-        // Log raw scoreboard data for debugging
-        console.log('Raw scoreboard data first event:', scoreboardData.events?.[0]);
+        if (!scoreboardData.events) {
+            throw new Error('No events data in scoreboard response');
+        }
         
         // Log all games from scoreboard for debugging
-        scoreboardData.events?.forEach(event => {
-            if (!event.competitions?.[0]?.competitors) return;
-            const competitors = event.competitions[0].competitors;
-            console.log('Game found:', {
-                teams: competitors.map(c => c.team?.abbreviation || 'UNKNOWN').join(' vs '),
-                date: event.date ? new Date(event.date).toLocaleString() : 'unknown',
-                status: event.status?.type?.state || 'unknown'
+        scoreboardData.events.forEach((event, index) => {
+            console.log(`Checking scoreboard event ${index}:`, {
+                date: event.date,
+                name: event.name,
+                status: event.status,
+                competitions: event.competitions
             });
+            
+            if (event.competitions?.[0]?.competitors) {
+                const competitors = event.competitions[0].competitors;
+                console.log('Game found:', {
+                    teams: competitors.map(c => c.team?.abbreviation || 'UNKNOWN').join(' vs '),
+                    date: event.date ? new Date(event.date).toLocaleString() : 'unknown',
+                    rawStatus: event.status // Log the raw status object
+                });
+            }
         });
         
         // Use todayGame if found in schedule, otherwise check scoreboard
-        const thunderGame = todayGame || scoreboardData.events?.find(event => {
+        const thunderGame = todayGame || scoreboardData.events.find(event => {
             if (!event.competitions?.[0]?.competitors) return false;
             const competitors = event.competitions[0].competitors;
             return competitors.some(comp => comp.team?.abbreviation === 'OKC');
@@ -68,9 +92,10 @@ async function getThunderScore() {
         
         if (thunderGame) {
             console.log('Thunder game found:', {
-                status: thunderGame.status?.type?.state || 'unknown',
-                completed: thunderGame.status?.type?.completed || false,
-                date: thunderGame.date ? new Date(thunderGame.date).toLocaleString() : 'unknown'
+                date: thunderGame.date ? new Date(thunderGame.date).toLocaleString() : 'unknown',
+                name: thunderGame.name,
+                rawStatus: thunderGame.status, // Log the raw status object
+                rawCompetitions: thunderGame.competitions
             });
             
             const competition = thunderGame.competitions?.[0];
@@ -90,9 +115,11 @@ async function getThunderScore() {
             const homeAbbrev = homeTeam.team?.abbreviation || 'HOME';
             const awayAbbrev = awayTeam.team?.abbreviation || 'AWAY';
 
-            // Check if the game hasn't started yet
-            const gameState = thunderGame.status?.type?.state || '';
-            const isCompleted = thunderGame.status?.type?.completed || false;
+            // Check game state - log the raw status first
+            console.log('Game status object:', thunderGame.status);
+            
+            const gameState = thunderGame.status?.state || thunderGame.status?.type?.state || '';
+            const isCompleted = thunderGame.status?.completed || thunderGame.status?.type?.completed || false;
             
             if (!isCompleted && 
                 (gameState === 'pre' || 
@@ -127,20 +154,25 @@ async function getThunderScore() {
                 console.log('Returning in-progress game score');
                 return {
                     hasGame: true,
-                    score: `${awayAbbrev} ${awayScore} - ${homeAbbrev} ${homeScore} (${thunderGame.status?.type?.detail || 'In Progress'})`
+                    score: `${awayAbbrev} ${awayScore} - ${homeAbbrev} ${homeScore} (${thunderGame.status?.detail || thunderGame.status?.type?.detail || 'In Progress'})`
                 };
             }
         }
         
         // If we get here, check the most recent completed game from schedule data
-        const recentGame = scheduleData.events?.reverse().find(event => 
+        const recentGames = scheduleData.events.filter(event => 
+            event.competitions?.[0]?.status?.completed || 
             event.competitions?.[0]?.status?.type?.completed
         );
         
-        if (recentGame) {
-            console.log('Found recent game:', {
+        console.log('Recent completed games found:', recentGames.length);
+        
+        if (recentGames.length > 0) {
+            const recentGame = recentGames[0];
+            console.log('Most recent game:', {
                 date: recentGame.date ? new Date(recentGame.date).toLocaleDateString() : 'unknown',
-                status: recentGame.status?.type?.state || 'unknown'
+                name: recentGame.name,
+                rawStatus: recentGame.status
             });
             
             const competition = recentGame.competitions?.[0];
