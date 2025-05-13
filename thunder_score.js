@@ -30,10 +30,26 @@ async function getThunderScore() {
             console.log('Home team:', homeTeam);
             console.log('Away team:', awayTeam);
             
-            const homeScore = homeTeam.score.displayValue || '0';
-            const awayScore = awayTeam.score.displayValue || '0';
+            const homeScore = homeTeam.score?.displayValue || '0';
+            const awayScore = awayTeam.score?.displayValue || '0';
             const homeAbbrev = homeTeam.team.abbreviation;
             const awayAbbrev = awayTeam.team.abbreviation;
+
+            // Check if the game hasn't started yet
+            if (!thunderGame.status.type.completed && thunderGame.status.type.state === 'pre') {
+                // Convert game time to Central Time
+                const gameDate = new Date(thunderGame.date);
+                const centralTime = new Intl.DateTimeFormat('en-US', {
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    timeZone: 'America/Chicago'
+                }).format(gameDate);
+                
+                return {
+                    hasGame: true,
+                    score: `Thunder Game Today at ${centralTime} Central\n${awayAbbrev} @ ${homeAbbrev}`
+                };
+            }
             
             if (thunderGame.status.type.completed) {
                 return {
@@ -44,11 +60,6 @@ async function getThunderScore() {
                 return {
                     hasGame: true,
                     score: `${awayAbbrev} ${awayScore} - ${homeAbbrev} ${homeScore} (${thunderGame.status.type.detail})`
-                };
-            } else {
-                return {
-                    hasGame: true,
-                    score: `${awayAbbrev} vs ${homeAbbrev} - Game starts at ${thunderGame.status.type.shortDetail}`
                 };
             }
         }
@@ -71,48 +82,26 @@ async function getThunderScore() {
         
         if (recentGame) {
             console.log('Found recent game:', recentGame);
-            
-            // Get the competition data
             const competition = recentGame.competitions[0];
-            console.log('Competition data:', competition);
-            
-            // Get competitors array and log it
             const competitors = competition.competitors || [];
-            console.log('Competitors array:', competitors);
-            
-            // Find home and away teams
             const homeTeam = competitors.find(team => team.homeAway === 'home') || {};
             const awayTeam = competitors.find(team => team.homeAway === 'away') || {};
             
-            console.log('Raw home team:', homeTeam);
-            console.log('Raw away team:', awayTeam);
-            
             const gameDate = new Date(recentGame.date).toLocaleDateString();
-            
-            // Get team abbreviations
             const homeAbbrev = homeTeam.team?.abbreviation || 'HOME';
             const awayAbbrev = awayTeam.team?.abbreviation || 'AWAY';
-            
-            // Get scores from the value property
-            const homeScore = homeTeam.score?.value || '0';
-            const awayScore = awayTeam.score?.value || '0';
-            
-            console.log('Extracted data:', {
-                homeAbbrev,
-                awayAbbrev,
-                homeScore,
-                awayScore
-            });
+            const homeScore = homeTeam.score?.displayValue || '0';
+            const awayScore = awayTeam.score?.displayValue || '0';
             
             return {
                 hasGame: false,
-                score: `No Thunder game scheduled for today\nLast game (${gameDate}):\n${awayAbbrev} ${awayScore} - ${homeAbbrev} ${homeScore} (Final)`
+                score: `Most Recent Game (${gameDate}):\n${awayAbbrev} ${awayScore} - ${homeAbbrev} ${homeScore} (Final)`
             };
         }
         
         return {
             hasGame: false,
-            score: "No Thunder game scheduled for today"
+            score: "No recent Thunder games found"
         };
     } catch (error) {
         console.error('Error with ESPN API:', error);
