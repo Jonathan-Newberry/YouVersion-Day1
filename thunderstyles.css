@@ -38,7 +38,7 @@ body {
 .recent-score {
     font-size: 1.8rem;
     margin: 2rem 0;
-    color: #ef3b24; /* Thunder Orange - match today's game color */
+    color: #ef3b24 !important; /* Force Thunder Orange color */
     white-space: pre-line; /* Preserve line breaks */
 }
 
