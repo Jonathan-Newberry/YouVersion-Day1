@@ -24,10 +24,12 @@
 
     <script src="thunder_score.js"></script>
     <script>
-        // Note: This is a frontend example. In a real app, you'd need to:
+        // Note: This is a frontend example. In a real app (using an API that needs a key), 
+        // you'd need to:
         // 1. Use a backend server to make API calls
         // 2. Never expose API keys in frontend code
         async function refreshScore() {
+            console.log('Starting refreshScore function...');
             try {
                 // Disable the refresh button while loading
                 const refreshButton = document.getElementById('refreshButton');
@@ -35,16 +37,24 @@
                 refreshButton.textContent = 'Refreshing...';
                 
                 // Get and display the score
+                console.log('Calling getThunderScore...');
                 const result = await getThunderScore();
+                console.log('Result from getThunderScore:', result);
+                
                 const scoreElement = document.getElementById('score');
                 const headerElement = document.getElementById('score-header');
                 
                 // Update header based on whether it's a current or recent game
                 headerElement.textContent = result.hasGame ? 'Current Thunder Score:' : 'Latest Thunder Score:';
+                console.log('Updated header:', headerElement.textContent);
                 
                 // Update score with proper styling
                 scoreElement.textContent = result.score;
                 scoreElement.className = result.hasGame ? 'score' : 'score recent-score';
+                console.log('Updated score element:', {
+                    text: scoreElement.textContent,
+                    className: scoreElement.className
+                });
             } catch (error) {
                 console.error('Error in refreshScore:', error);
                 document.getElementById('score').textContent = 'Error loading score. Please try again.';
@@ -53,10 +63,12 @@
                 const refreshButton = document.getElementById('refreshButton');
                 refreshButton.disabled = false;
                 refreshButton.textContent = 'Refresh Score';
+                console.log('Refresh complete.');
             }
         }
 
         // Load score when page loads
+        console.log('Page loaded, calling refreshScore...');
         refreshScore();
     </script>
 </body>
