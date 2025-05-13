@@ -38,6 +38,7 @@ body {
     font-size: 1.8rem;
     color: #666;
     margin: 2rem 0;
+    white-space: pre-line; /* Preserve line breaks */
 }
 
 .button-container {
