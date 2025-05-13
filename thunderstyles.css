@@ -42,6 +42,13 @@ body {
     white-space: pre-line; /* Preserve line breaks */
 }
 
+.recent-header {
+    font-size: 1.5rem;
+    color: #007ac1;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+}
+
 .button-container {
     margin-top: 2rem;
 }
