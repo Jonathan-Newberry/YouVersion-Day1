@@ -10,10 +10,13 @@ async function getThunderScore() {
         }
         
         const scheduleData = await scheduleResponse.json();
-        console.log('Raw Schedule API response:', scheduleData);
-        console.log('Schedule API events:', scheduleData.events?.length);
+        
+        // Immediately log the raw data
+        console.log('Raw Schedule API response:', JSON.stringify(scheduleData, null, 2));
+        console.log('Schedule API events length:', scheduleData.events?.length);
         
         if (!scheduleData.events) {
+            console.log('No events found in schedule data');
             throw new Error('No events data in schedule response');
         }
         
@@ -24,119 +27,73 @@ async function getThunderScore() {
         let todayGame = null;
         
         // Log each event as we check it
-        scheduleData.events.forEach((event, index) => {
-            console.log(`Checking schedule event ${index}:`, {
-                date: event.date,
-                name: event.name,
-                status: event.status
-            });
+        for (const event of scheduleData.events) {
+            // Log the raw event first
+            console.log('Raw schedule event:', JSON.stringify(event, null, 2));
             
-            if (!event.date) return;
+            if (!event.date) {
+                console.log('Event missing date:', event);
+                continue;
+            }
+            
             const gameDate = new Date(event.date);
             gameDate.setHours(0, 0, 0, 0);
+            
+            console.log('Comparing dates:', {
+                gameDate: gameDate.toISOString(),
+                today: today.toISOString(),
+                matches: gameDate.getTime() === today.getTime()
+            });
+            
             if (gameDate.getTime() === today.getTime()) {
                 todayGame = event;
-                console.log('Found matching game:', event);
+                console.log('Found matching game:', JSON.stringify(event, null, 2));
+                break;
             }
-        });
+        }
         
         if (todayGame) {
-            console.log('Found game in schedule for today:', {
-                date: todayGame.date ? new Date(todayGame.date).toLocaleString() : 'unknown',
+            console.log('Processing today\'s game:', {
+                date: todayGame.date,
                 name: todayGame.name,
-                rawStatus: todayGame.status // Log the raw status object
-            });
-        }
-        
-        // Also check the scoreboard API
-        console.log('Attempting to fetch from ESPN Scoreboard API...');
-        const scoreboardResponse = await fetch('https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard');
-        
-        if (!scoreboardResponse.ok) {
-            throw new Error(`ESPN Scoreboard API HTTP error! status: ${scoreboardResponse.status}`);
-        }
-        
-        const scoreboardData = await scoreboardResponse.json();
-        console.log('Raw Scoreboard API response:', scoreboardData);
-        console.log('Scoreboard API events:', scoreboardData.events?.length);
-        
-        if (!scoreboardData.events) {
-            throw new Error('No events data in scoreboard response');
-        }
-        
-        // Log all games from scoreboard for debugging
-        scoreboardData.events.forEach((event, index) => {
-            console.log(`Checking scoreboard event ${index}:`, {
-                date: event.date,
-                name: event.name,
-                status: event.status,
-                competitions: event.competitions
+                status: todayGame.status
             });
             
-            if (event.competitions?.[0]?.competitors) {
-                const competitors = event.competitions[0].competitors;
-                console.log('Game found:', {
-                    teams: competitors.map(c => c.team?.abbreviation || 'UNKNOWN').join(' vs '),
-                    date: event.date ? new Date(event.date).toLocaleString() : 'unknown',
-                    rawStatus: event.status // Log the raw status object
-                });
-            }
-        });
-        
-        // Use todayGame if found in schedule, otherwise check scoreboard
-        const thunderGame = todayGame || scoreboardData.events.find(event => {
-            if (!event.competitions?.[0]?.competitors) return false;
-            const competitors = event.competitions[0].competitors;
-            return competitors.some(comp => comp.team?.abbreviation === 'OKC');
-        });
-        
-        if (thunderGame) {
-            console.log('Thunder game found:', {
-                date: thunderGame.date ? new Date(thunderGame.date).toLocaleString() : 'unknown',
-                name: thunderGame.name,
-                rawStatus: thunderGame.status, // Log the raw status object
-                rawCompetitions: thunderGame.competitions
-            });
-            
-            const competition = thunderGame.competitions?.[0];
+            const competition = todayGame.competitions?.[0];
             if (!competition) {
-                throw new Error('Invalid competition data in Thunder game');
+                console.log('No competition data found in today\'s game');
+                throw new Error('Invalid competition data in today\'s game');
             }
             
             const homeTeam = competition.competitors?.find(team => team.homeAway === 'home');
             const awayTeam = competition.competitors?.find(team => team.homeAway === 'away');
             
             if (!homeTeam || !awayTeam) {
-                throw new Error('Invalid team data in Thunder game');
+                console.log('Missing team data:', { homeTeam, awayTeam });
+                throw new Error('Invalid team data in today\'s game');
             }
             
             const homeScore = homeTeam.score?.displayValue || '0';
             const awayScore = awayTeam.score?.displayValue || '0';
             const homeAbbrev = homeTeam.team?.abbreviation || 'HOME';
             const awayAbbrev = awayTeam.team?.abbreviation || 'AWAY';
-
-            // Check game state - log the raw status first
-            console.log('Game status object:', thunderGame.status);
             
-            const gameState = thunderGame.status?.state || thunderGame.status?.type?.state || '';
-            const isCompleted = thunderGame.status?.completed || thunderGame.status?.type?.completed || false;
+            // Get game state
+            const status = todayGame.status || {};
+            console.log('Game status:', status);
             
-            if (!isCompleted && 
-                (gameState === 'pre' || 
-                 gameState === 'scheduled' || 
-                 gameState === 'pending')) {
-                // Convert game time to Central Time
-                const gameDate = new Date(thunderGame.date);
+            const gameState = status.state || (status.type && status.type.state) || '';
+            const isCompleted = status.completed || (status.type && status.type.completed) || false;
+            
+            console.log('Processed game state:', { gameState, isCompleted });
+            
+            if (!isCompleted && ['pre', 'scheduled', 'pending'].includes(gameState)) {
+                const gameDate = new Date(todayGame.date);
                 const centralTime = new Intl.DateTimeFormat('en-US', {
                     hour: 'numeric',
                     minute: '2-digit',
                     timeZone: 'America/Chicago'
                 }).format(gameDate);
-                
-                console.log('Returning upcoming game info:', {
-                    time: centralTime,
-                    matchup: `${awayAbbrev} @ ${homeAbbrev}`
-                });
                 
                 return {
                     hasGame: true,
@@ -145,38 +102,43 @@ async function getThunderScore() {
             }
             
             if (isCompleted) {
-                console.log('Returning completed game score');
                 return {
                     hasGame: true,
                     score: `${awayAbbrev} ${awayScore} - ${homeAbbrev} ${homeScore} (Final)`
                 };
             } else if (gameState === 'in') {
-                console.log('Returning in-progress game score');
+                const detail = status.detail || (status.type && status.type.detail) || 'In Progress';
                 return {
                     hasGame: true,
-                    score: `${awayAbbrev} ${awayScore} - ${homeAbbrev} ${homeScore} (${thunderGame.status?.detail || thunderGame.status?.type?.detail || 'In Progress'})`
+                    score: `${awayAbbrev} ${awayScore} - ${homeAbbrev} ${homeScore} (${detail})`
                 };
             }
         }
         
-        // If we get here, check the most recent completed game from schedule data
-        const recentGames = scheduleData.events.filter(event => 
-            event.competitions?.[0]?.status?.completed || 
-            event.competitions?.[0]?.status?.type?.completed
-        );
+        // If no game today, find the most recent completed game
+        const recentGames = scheduleData.events
+            .filter(event => {
+                const status = event.status || {};
+                return status.completed || (status.type && status.type.completed);
+            })
+            .sort((a, b) => new Date(b.date) - new Date(a.date));
         
         console.log('Recent completed games found:', recentGames.length);
         
         if (recentGames.length > 0) {
             const recentGame = recentGames[0];
-            console.log('Most recent game:', {
-                date: recentGame.date ? new Date(recentGame.date).toLocaleDateString() : 'unknown',
+            console.log('Processing most recent game:', {
+                date: recentGame.date,
                 name: recentGame.name,
-                rawStatus: recentGame.status
+                status: recentGame.status
             });
             
             const competition = recentGame.competitions?.[0];
-            const competitors = competition?.competitors || [];
+            if (!competition) {
+                throw new Error('Invalid competition data in recent game');
+            }
+            
+            const competitors = competition.competitors || [];
             const homeTeam = competitors.find(team => team?.homeAway === 'home') || {};
             const awayTeam = competitors.find(team => team?.homeAway === 'away') || {};
             
@@ -198,6 +160,7 @@ async function getThunderScore() {
         };
     } catch (error) {
         console.error('Error with ESPN API:', error);
+        console.error('Error stack:', error.stack);
         return {
             hasGame: false,
             score: "Error fetching score. Check browser console for details."
