@@ -59,14 +59,17 @@
                     todayScoreElement.textContent = todayGame;
                     todayScoreElement.style.display = 'block';
                     if (recentGame) {
+                        document.querySelector('.recent-header').style.display = 'block';
                         recentScoreElement.textContent = recentGame;
                         recentScoreElement.style.display = 'block';
                     } else {
+                        document.querySelector('.recent-header').style.display = 'none';
                         recentScoreElement.style.display = 'none';
                     }
                 } else {
                     todayScoreElement.textContent = result.score;
                     todayScoreElement.style.display = 'block';
+                    document.querySelector('.recent-header').style.display = 'none';
                     recentScoreElement.style.display = 'none';
                 }
                 

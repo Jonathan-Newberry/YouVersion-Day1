@@ -140,7 +140,7 @@ async function getThunderScore() {
             const homeScore = homeTeam.score?.displayValue || '0';
             const awayScore = awayTeam.score?.displayValue || '0';
             
-            recentGameMessage = `Most Recent Game (${gameDate}):\n${awayAbbrev} ${awayScore} - ${homeAbbrev} ${homeScore} (Final)`;
+            recentGameMessage = `${awayAbbrev} ${awayScore} - ${homeAbbrev} ${homeScore} (Final)\n${gameDate}`;
         }
         
         // Combine messages
