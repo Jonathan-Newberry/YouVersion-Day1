@@ -39,15 +39,17 @@ async function getThunderScore() {
             }
             
             const gameDate = new Date(event.date);
-            gameDate.setHours(0, 0, 0, 0);
+            const gameDateStart = new Date(gameDate);
+            gameDateStart.setHours(0, 0, 0, 0);
             
             console.log('Comparing dates:', {
                 gameDate: gameDate.toISOString(),
+                gameDateStart: gameDateStart.toISOString(),
                 today: today.toISOString(),
-                matches: gameDate.getTime() === today.getTime()
+                matches: gameDateStart.getTime() === today.getTime()
             });
             
-            if (gameDate.getTime() === today.getTime()) {
+            if (gameDateStart.getTime() === today.getTime()) {
                 todayGame = event;
                 console.log('Found matching game:', JSON.stringify(event, null, 2));
                 break;
@@ -81,8 +83,6 @@ async function getThunderScore() {
                 throw new Error('Invalid team data in today\'s game');
             }
             
-            const homeScore = homeTeam.score?.displayValue || '0';
-            const awayScore = awayTeam.score?.displayValue || '0';
             const homeAbbrev = homeTeam.team.abbreviation || 'HOME';
             const awayAbbrev = awayTeam.team.abbreviation || 'AWAY';
             
@@ -90,53 +90,19 @@ async function getThunderScore() {
             const status = todayGame.status || {};
             console.log('Game status:', status);
             
-            // Check if status.type exists, if not use status directly
-            const gameState = status.state || (status.type && status.type.state) || '';
-            const isCompleted = status.completed || (status.type && status.type.completed) || false;
+            // Format game time in Central time
+            const gameDate = new Date(todayGame.date);
+            const centralTime = new Intl.DateTimeFormat('en-US', {
+                hour: 'numeric',
+                minute: '2-digit',
+                timeZone: 'America/Chicago'
+            }).format(gameDate);
             
-            console.log('Processed game state:', { gameState, isCompleted });
-            
-            // If we have a valid game date but no state, treat it as an upcoming game
-            if (!gameState && todayGame.date) {
-                const gameDate = new Date(todayGame.date);
-                const centralTime = new Intl.DateTimeFormat('en-US', {
-                    hour: 'numeric',
-                    minute: '2-digit',
-                    timeZone: 'America/Chicago'
-                }).format(gameDate);
-                
-                return {
-                    hasGame: true,
-                    score: `Thunder Game Today at ${centralTime} Central\n${awayAbbrev} @ ${homeAbbrev}`
-                };
-            }
-            
-            if (!isCompleted && ['pre', 'scheduled', 'pending', ''].includes(gameState)) {
-                const gameDate = new Date(todayGame.date);
-                const centralTime = new Intl.DateTimeFormat('en-US', {
-                    hour: 'numeric',
-                    minute: '2-digit',
-                    timeZone: 'America/Chicago'
-                }).format(gameDate);
-                
-                return {
-                    hasGame: true,
-                    score: `Thunder Game Today at ${centralTime} Central\n${awayAbbrev} @ ${homeAbbrev}`
-                };
-            }
-            
-            if (isCompleted) {
-                return {
-                    hasGame: true,
-                    score: `${awayAbbrev} ${awayScore} - ${homeAbbrev} ${homeScore} (Final)`
-                };
-            } else if (gameState === 'in') {
-                const detail = status.detail || (status.type && status.type.detail) || 'In Progress';
-                return {
-                    hasGame: true,
-                    score: `${awayAbbrev} ${awayScore} - ${homeAbbrev} ${homeScore} (${detail})`
-                };
-            }
+            // Always return upcoming game info if it's today's game
+            return {
+                hasGame: true,
+                score: `Thunder Game Today at ${centralTime} Central\n${awayAbbrev} @ ${homeAbbrev}`
+            };
         }
         
         // If no game today, find the most recent completed game
