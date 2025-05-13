@@ -67,18 +67,24 @@ async function getThunderScore() {
                 throw new Error('Invalid competition data in today\'s game');
             }
             
-            const homeTeam = competition.competitors?.find(team => team.homeAway === 'home');
-            const awayTeam = competition.competitors?.find(team => team.homeAway === 'away');
+            // Get both teams from the competitors array
+            const competitors = competition.competitors || [];
+            console.log('Competitors:', competitors);
             
-            if (!homeTeam || !awayTeam) {
+            const homeTeam = competitors.find(team => team?.homeAway === 'home');
+            const awayTeam = competitors.find(team => team?.homeAway === 'away');
+            
+            console.log('Teams:', { homeTeam, awayTeam });
+            
+            if (!homeTeam?.team || !awayTeam?.team) {
                 console.log('Missing team data:', { homeTeam, awayTeam });
                 throw new Error('Invalid team data in today\'s game');
             }
             
             const homeScore = homeTeam.score?.displayValue || '0';
             const awayScore = awayTeam.score?.displayValue || '0';
-            const homeAbbrev = homeTeam.team?.abbreviation || 'HOME';
-            const awayAbbrev = awayTeam.team?.abbreviation || 'AWAY';
+            const homeAbbrev = homeTeam.team.abbreviation || 'HOME';
+            const awayAbbrev = awayTeam.team.abbreviation || 'AWAY';
             
             // Get game state
             const status = todayGame.status || {};
