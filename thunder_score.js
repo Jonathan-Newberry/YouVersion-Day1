@@ -27,6 +27,7 @@ async function getThunderScore() {
         today.setHours(0, 0, 0, 0);
         
         let todayGame = null;
+        let todayGameMessage = "";
         
         // Log and process each event
         for (const event of scheduleData.events) {
@@ -56,6 +57,7 @@ async function getThunderScore() {
             }
         }
         
+        // Process today's game if found
         if (todayGame) {
             console.log('Processing today\'s game:', {
                 date: todayGame.date,
@@ -83,35 +85,28 @@ async function getThunderScore() {
             if (!homeTeam?.team || !awayTeam?.team) {
                 console.log('Missing team data, parsing from game name:', todayGame.name);
                 const [awayName, homeName] = todayGame.name.split(' at ');
-                return {
-                    hasGame: true,
-                    score: `Thunder Game Today at ${new Intl.DateTimeFormat('en-US', {
-                        hour: 'numeric',
-                        minute: '2-digit',
-                        timeZone: 'America/Chicago'
-                    }).format(new Date(todayGame.date))} Central\n${awayName} @ ${homeName}`
-                };
+                todayGameMessage = `Thunder Game Today at ${new Intl.DateTimeFormat('en-US', {
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    timeZone: 'America/Chicago'
+                }).format(new Date(todayGame.date))} Central\n${awayName} @ ${homeName}`;
+            } else {
+                const homeAbbrev = homeTeam.team.abbreviation || 'HOME';
+                const awayAbbrev = awayTeam.team.abbreviation || 'AWAY';
+                
+                // Format game time in Central time
+                const gameDate = new Date(todayGame.date);
+                const centralTime = new Intl.DateTimeFormat('en-US', {
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    timeZone: 'America/Chicago'
+                }).format(gameDate);
+                
+                todayGameMessage = `Thunder Game Today at ${centralTime} Central\n${awayAbbrev} @ ${homeAbbrev}`;
             }
-            
-            const homeAbbrev = homeTeam.team.abbreviation || 'HOME';
-            const awayAbbrev = awayTeam.team.abbreviation || 'AWAY';
-            
-            // Format game time in Central time
-            const gameDate = new Date(todayGame.date);
-            const centralTime = new Intl.DateTimeFormat('en-US', {
-                hour: 'numeric',
-                minute: '2-digit',
-                timeZone: 'America/Chicago'
-            }).format(gameDate);
-            
-            // Always return upcoming game info if it's today's game
-            return {
-                hasGame: true,
-                score: `Thunder Game Today at ${centralTime} Central\n${awayAbbrev} @ ${homeAbbrev}`
-            };
         }
         
-        // If no game today, find the most recent completed game
+        // Find the most recent completed game
         const recentGames = scheduleData.events
             .filter(event => {
                 const status = event.status || {};
@@ -121,6 +116,7 @@ async function getThunderScore() {
         
         console.log('Recent completed games found:', recentGames.length);
         
+        let recentGameMessage = "";
         if (recentGames.length > 0) {
             const recentGame = recentGames[0];
             console.log('Processing most recent game:', {
@@ -144,15 +140,24 @@ async function getThunderScore() {
             const homeScore = homeTeam.score?.displayValue || '0';
             const awayScore = awayTeam.score?.displayValue || '0';
             
-            return {
-                hasGame: false,
-                score: `Most Recent Game (${gameDate}):\n${awayAbbrev} ${awayScore} - ${homeAbbrev} ${homeScore} (Final)`
-            };
+            recentGameMessage = `Most Recent Game (${gameDate}):\n${awayAbbrev} ${awayScore} - ${homeAbbrev} ${homeScore} (Final)`;
+        }
+        
+        // Combine messages
+        let finalMessage = "";
+        if (todayGameMessage && recentGameMessage) {
+            finalMessage = `${todayGameMessage}\n\n${recentGameMessage}`;
+        } else if (todayGameMessage) {
+            finalMessage = todayGameMessage;
+        } else if (recentGameMessage) {
+            finalMessage = recentGameMessage;
+        } else {
+            finalMessage = "No recent Thunder games found";
         }
         
         return {
-            hasGame: false,
-            score: "No recent Thunder games found"
+            hasGame: !!todayGameMessage,
+            score: finalMessage
         };
     } catch (error) {
         console.error('Error with ESPN API:', error);
