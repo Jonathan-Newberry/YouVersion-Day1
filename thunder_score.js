@@ -90,7 +90,22 @@ async function getThunderScore() {
             
             console.log('Processed game state:', { gameState, isCompleted });
             
-            if (!isCompleted && ['pre', 'scheduled', 'pending'].includes(gameState)) {
+            // If we have a valid game date but no state, treat it as an upcoming game
+            if (!gameState && todayGame.date) {
+                const gameDate = new Date(todayGame.date);
+                const centralTime = new Intl.DateTimeFormat('en-US', {
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    timeZone: 'America/Chicago'
+                }).format(gameDate);
+                
+                return {
+                    hasGame: true,
+                    score: `Thunder Game Today at ${centralTime} Central\n${awayAbbrev} @ ${homeAbbrev}`
+                };
+            }
+            
+            if (!isCompleted && ['pre', 'scheduled', 'pending', ''].includes(gameState)) {
                 const gameDate = new Date(todayGame.date);
                 const centralTime = new Intl.DateTimeFormat('en-US', {
                     hour: 'numeric',
