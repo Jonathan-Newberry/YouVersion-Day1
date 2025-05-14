@@ -6,4 +6,8 @@ node_modules/
 
 # Other sensitive files
 config.json
-secrets.json 
+secrets.json
+
+# Exclude files
+**/firebase-config.js
+.DS_Store 
