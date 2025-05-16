@@ -6,7 +6,7 @@ body {
     align-items: center;
     height: 100vh;
     margin: 0;
-    background-color: rgb(59, 23, 117);
+    background-color: white;
 }
 
 /* ===== Container Layout ===== */
@@ -23,16 +23,14 @@ body {
 /* ===== Text Elements ===== */
 /* Heading Styles */
 h1 {
-    /*color: #1a73e8;*/
-    color: #2263b8;
+    color: #1a73e8;
     margin: 0;  /* Reset margin for consistent spacing */
     margin-bottom: 20px;
 }
 
 /* Paragraph Styling */
 p {
-    /*color: #666;*/
-    color: #ffffff; 
+    color: #666;
     font-size: 18px;
     text-align: center;
     margin-bottom: 20px;
@@ -96,8 +94,7 @@ button:last-of-type:hover {
 /* ===== About Page Specific Styles ===== */
 /* Greeting List Container */
 .greeting-list {
-    /*background-color: white;*/
-    background-color: #4f5e72;
+    background-color: white;
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -116,12 +113,10 @@ button:last-of-type:hover {
     padding: 10px;
     border-bottom: 1px solid #eee;
     font-size: 16px;
-    color: #ffffff;
 }
 
 .greeting-list li:last-child {
     border-bottom: none;
-    color: #000000;
 }
 
 /* ===== Navigation Buttons ===== */

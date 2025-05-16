@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OKC Thunder Score</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="favicon.svg?v=2">
+    <link rel="alternate icon" href="favicon.svg?v=2">
+    <!-- External CSS -->
+    <link rel="stylesheet" href="thunderstyles.css?v=2">
+</head>
+<body>
+    <div class="score-container">
+        <div>
+            <h1 id="score-header" class="score-header">Thunder Score</h1>
+            <div id="today-score" class="score">Loading...</div>
+            <h2 class="recent-header">Most Recent Thunder Score:</h2>
+            <div id="recent-score" class="recent-score"></div>
+        </div>
+        <div class="button-container">
+            <button onclick="refreshScore()" id="refreshButton">Refresh Score</button>
+            <button onclick="window.location.href='index.html'" class="back-button">Back to Home</button>
+        </div>
+    </div>
+
+    <script src="thunder_score.js"></script>
+    <script>
+        // Note: This is a frontend example. In a real app (using an API that needs a key), 
+        // you'd need to:
+        // 1. Use a backend server to make API calls
+        // 2. Never expose API keys in frontend code
+        async function refreshScore() {
+            console.log('Starting refreshScore function...');
+            try {
+                // Disable the refresh button while loading
+                const refreshButton = document.getElementById('refreshButton');
+                refreshButton.disabled = true;
+                refreshButton.textContent = 'Refreshing...';
+                
+                // Get and display the score
+                console.log('Calling getThunderScore...');
+                const result = await getThunderScore();
+                console.log('Result from getThunderScore:', result);
+                
+                const todayScoreElement = document.getElementById('today-score');
+                const recentScoreElement = document.getElementById('recent-score');
+                const headerElement = document.getElementById('score-header');
+                const recentHeaderElement = document.querySelector('.recent-header');
+                
+                // Update header
+                headerElement.textContent = 'Thunder Games:';
+                
+                // Show today's game
+                todayScoreElement.textContent = result.todayGame;
+                todayScoreElement.style.display = 'block';
+                
+                // Always show recent game section
+                recentHeaderElement.style.display = 'block';
+                recentScoreElement.textContent = result.recentGame;
+                recentScoreElement.style.display = 'block';
+                recentScoreElement.style.color = '#ef3b24'; // Force Thunder Orange color
+                
+                console.log('Updated score elements:', {
+                    today: todayScoreElement.textContent,
+                    recent: recentScoreElement.textContent,
+                    hasGame: result.hasGame
+                });
+            } catch (error) {
+                console.error('Error in refreshScore:', error);
+                document.getElementById('today-score').textContent = 'Error loading score. Please try again.';
+                document.getElementById('recent-score').style.display = 'none';
+            } finally {
+                // Re-enable the refresh button
+                const refreshButton = document.getElementById('refreshButton');
+                refreshButton.disabled = false;
+                refreshButton.textContent = 'Refresh Score';
+                console.log('Refresh complete.');
+            }
+        }
+
+        // Load score when page loads
+        console.log('Page loaded, calling refreshScore...');
+        refreshScore();
+    </script>
+</body>
+</html> 

@@ -1,0 +1,43 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Response Rules
+
+## General Communication
+1. Start every response with an appropriate emoji that matches the context
+2. Format all code references using proper markdown syntax
+3. Whenever deleting a file, say "THIS WILL PERMANENTLY DELETE A FILE" and double check with me before removing them
+4. Do not edit files in public without saying "THIS WILL CHANGE PUBLIC" and prompting me to confirm
+5. 
+
+## Storage and Data Handling
+1. Never remove localStorage code when modifying global storage counter functionality
+2. Preserve existing data persistence mechanisms unless explicitly requested
+3. Always maintain both local and global counter functionality
+
+## UI/UX Guidelines
+1. Ask for confirmation before implementing any UI changes not specifically requested
+2. Maintain consistent styling:
+   - Button hover effects: scale(1.05) and darken
+   - Login button: green (#34a853)
+   - Signup button: blue (#007bff)
+   - Input fields and buttons: same width
+   - Proper spacing and alignment
+
+## Authentication and Security
+1. Keep Firebase configuration details secure
+2. Never expose API keys or sensitive credentials
+3. Maintain proper error handling with user-friendly messages
+
+## File Structure
+1. Keep frontend files in server/public directory
+2. Maintain proper separation of concerns
+3. Follow established file organization patterns
+
+## Implementation Process
+1. Verify all dependencies before suggesting changes
+2. Include necessary import statements
+3. Ensure backward compatibility
+4. Test functionality before suggesting implementation
